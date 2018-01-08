@@ -1,42 +1,24 @@
-from pylab import *
-from utils import printDefault
-
 # data analysis and wrangling
 import pandas as pd
-import numpy as np
-import random as rnd
-
-# visualization
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-#from IPython import get_ipython
-#get_ipython().run_line_magic('matplotlib', 'qt')
-
+from pylab import *
 # machine learning
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.linear_model import Perceptron
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import SGDClassifier
-
-#Kickstart
-
-from utils import printDefault
-from learning import getDataInsight, analyzeFeaturesByPivoting
-from simplification import transform_features
-from encoding import encode_features
-from featureSelection import RecursiveFeatureSelection, UnivariateFeatureSelection
+from sklearn.svm import SVC
+from modelSelection import test
+from preprocessing.encoding import encode_features
+# Kickstart
+from preprocessing.simplification import transform_features
+from preprocessing.featureSelection import RecursiveFeatureSelection
+# visualization
+# from IPython import get_ipython
+# get_ipython().run_line_magic('matplotlib', 'qt')
 
 train_df = pd.read_csv('./input/train.csv')
 test_df = pd.read_csv('./input/test.csv')
 
+
 #Get Insights about data
 #getDataInsight(train_df)
-
 #analyzeFeaturesByPivoting(train_df, "Survived")
 
 #simplify data
@@ -54,21 +36,29 @@ X_train = train_df.drop(['Survived', 'PassengerId'], axis=1)
 
 X_test = test_df.drop('PassengerId', axis=1).copy()
 
+#Model Selection
+test(X_train, Y_train)
 #FEATURE SELECTION
-
+""""
 #Train
 logreg = LogisticRegression()
-logregrfe = RecursiveFeatureSelection(logreg, 2)
-hop = logregrfe.fit_transform(X_train, Y_train)
-print(X_train.columns)
-print(logregrfe.get_support())
-Y_pred = logregrfe.predict(X_test)
-acc_log = round(logregrfe.score(X_train, Y_train) * 100, 2)
+logregrfe = RecursiveFeatureSelection(logreg, 3)
+acc_log = round(svc_model.score(X_train, Y_train) * 100, 2)
+#Y_pred = logregrfe.predict(X_test)
+Y_pred = svc_model.predict(X_test)
+"""
 
+#Best Selected Model Evaluation
+forest = RandomForestClassifier(bootstrap=True, max_depth=7, max_features='sqrt', min_samples_leaf=3,
+                                min_samples_split=2, n_estimators=10)
+forest.fit(X_train, Y_train)
+acc_log = forest.score(X_train, Y_train)
+Y_pred = forest.predict(X_test)
 print(acc_log)
 
+#FINALIZATION
 submission = pd.DataFrame({
         "PassengerId": test_df["PassengerId"],
         "Survived": Y_pred
     })
-submission.to_csv('output/submission.csv', index=False)
+submission.to_csv('output/'+ "lol-name" + '.csv', index=False)
